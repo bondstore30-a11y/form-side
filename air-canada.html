@@ -16,6 +16,7 @@
     h1 {
         text-align: center;
         color: #ff6b6b;
+        margin: 0;
     }
 
 .header-row {
@@ -45,6 +46,7 @@
     margin-right: -26px; /* ⭐ আগের মতোই থাকবে */
     margin-top: -20px;   /* ⭐ শুধু উপরে তোলা হলো */
 }
+
     /* ⭐ Row + Column layout */
     .row {
         display: flex;
@@ -95,7 +97,7 @@
     }
 
     table {
-        width: 100%;
+        width: 90%;
         border-collapse: separate;
         border-spacing: 0;
         margin-top: 15px;
@@ -198,7 +200,7 @@
         <label>Sector</label>
         <input list="sectorList" id="sector" class="box">
         <datalist id="sectorList">
-            <option value="Domestic">
+            <option value="DXB TO YYZ">
             <option value="International">
             <option value="Cargo">
         </datalist>
@@ -211,7 +213,7 @@
             <input list="configList" id="configuration" class="box config-input">
 
             <datalist id="configList">
-                <option value="P-12 J-24 W-50 Y-200">
+                <option value="P-00 J-30 W-21 Y-247">
                 <option value="P-08 J-30 W-40 Y-180">
                 <option value="P-10 J-20 W-60 Y-220">
             </datalist>
@@ -222,7 +224,7 @@
         <label>A/C Type</label>
         <input list="acList" id="acType" class="box" placeholder="For example: A330 / B777">
         <datalist id="acList">
-            <option value="A320">
+            <option value="789">
             <option value="A330">
             <option value="A350">
             <option value="B737">
@@ -662,6 +664,7 @@
 
 <script>
 // ⭐ GLOBAL: store row to delete
+let rowToDelete = null;
 let pdfToDeleteIndex = null;
 
 
@@ -824,7 +827,7 @@ if (pdfToDeleteTime !== null) {
 /* ⭐ RIGHT SIDE BUTTON STYLE */
 .modern-btn {
     padding: 12px 20px;
-    width: 200px;
+    width: 130px;
     cursor: pointer;
     border-radius: 12px;
     border: none;
@@ -1456,7 +1459,6 @@ function downloadPDF(url, fileName) {
 // ---------------------- PDF Library (MOVED TO TOP) ----------------------
 let savedPDFs = JSON.parse(localStorage.getItem("savedPDFs") || "[]");
 
-
 // ---------------------- Helper ----------------------
 const $ = id => document.getElementById(id)?.value || "";
 
@@ -1487,42 +1489,51 @@ async function savePDF() {
         format: "a4"
     });
 
-    // ---------------------- LOGO (GitHub RAW Links) ----------------------
-    try {
-        const emiratesURL = "https://raw.githubusercontent.com/bondstore30-a11y/form-side/main/emirates-logo.png";
-        const airCanadaURL = "https://raw.githubusercontent.com/bondstore30-a11y/form-side/main/air-canada-logo.png";
+// ---------------------- LOGO (GitHub RAW Links) ----------------------
+const emiratesURL = "https://raw.githubusercontent.com/bondstore30-a11y/form-side/main/emirates-logo.png";
+const airCanadaURL = "https://raw.githubusercontent.com/bondstore30-a11y/form-side/main/air-canada-logo.png";
 
-        const emiratesLogo = await loadImageAsBase64(emiratesURL);
-        const airCanadaLogo = await loadImageAsBase64(airCanadaURL);
+const emiratesLogo = await loadImageAsBase64(emiratesURL);
+const airCanadaLogo = await loadImageAsBase64(airCanadaURL);
 
-        // Left logo
-        doc.addImage(emiratesLogo, "PNG", 5, 5, 42, 28);
+// Left logo (more left)
+doc.addImage(emiratesLogo, "PNG", 5, 5, 42, 28);
 
-        // Right logo
-        doc.addImage(airCanadaLogo, "PNG", 168, 5, 42, 28);
+// Right logo (more right)
+doc.addImage(airCanadaLogo, "PNG", 168, 5, 42, 28);
 
-    } catch (error) {
-        console.log("Logo Load Error:", error);
-    }
+// ---------------------- Header (Balanced Layout) ----------------------
 
-    // ---------------------- Header (Balanced Layout) ----------------------
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(23);
-    doc.text("Air Canada", 105, 17, { align: "center" });
+// Air Canada (top)
+doc.setFont("helvetica", "bold");
+doc.setFontSize(23);
+doc.text("Air Canada", 105, 17, { align: "center" });
 
-    doc.setFontSize(17);
-    doc.text("Bond Exchange Replenishment Form", 105, 27, { align: "center" });
+// Form Title
+doc.setFontSize(17);
+doc.text("Bond Exchange Replenishment Form", 105, 27, { align: "center" });
 
-    // ---------------------- Balanced Sub Header Fields ----------------------
-    doc.setFontSize(12);
+// ---------------------- Balanced Sub Header Fields ----------------------
+doc.setFontSize(12);
 
-    doc.text("Airline: " + $("airline"), 15, 45);
-    doc.text("Flight No: " + $("flight"), 75, 45);
-    doc.text("Date: " + $("date"), 160, 45);
+// First row (Airline / Flight No / Date)
+doc.text("Airline: " + $("airline"), 15, 45);
 
-    doc.text("Sector: " + $("sector"), 15, 53);
-    doc.text("Configuration: " + $("configuration"), 75, 53);
-    doc.text("A/C Type: " + $("acType"), 160, 53);
+// Flight No → আরও ডান পাশে
+doc.text("Flight No: " + $("flight"), 75, 45);   // আগে 65 ছিল → এখন 75
+
+// Date → আগের মতোই ডান পাশে
+doc.text("Date: " + $("date"), 160, 45);
+
+
+// Second row (Sector / Configuration / A/C Type)
+doc.text("Sector: " + $("sector"), 15, 53);
+
+// Configuration → আরও ডান পাশে
+doc.text("Configuration: " + $("configuration"), 75, 53);   // আগে 65 ছিল → এখন 75
+
+// A/C Type → আগের মতোই ডান পাশে
+doc.text("A/C Type: " + $("acType"), 160, 53);
 
     // ---------------------- Table ----------------------
     let table = document.getElementById("itemTable");
@@ -1542,25 +1553,26 @@ async function savePDF() {
         rows.push([i, code, desc, unit, qty, remarks]);
     }
 
-    doc.autoTable({
-        startY: 60,
-        head: [["#", "Code", "Description", "Unit", "Qty", "Remarks"]],
-        body: rows,
-        styles: { fontSize: 10 },
-        headStyles: { fillColor: [40, 40, 40] },
+doc.autoTable({
+    startY: 60,
+    head: [["#", "Code", "Description", "Unit", "Qty", "Remarks"]],
+    body: rows,
+    styles: { fontSize: 10 },
+    headStyles: { fillColor: [40, 40, 40] },
 
-        columnStyles: {
-            0: { cellWidth: 10 },
-            1: { cellWidth: 20 },
-            2: { cellWidth: 90 },
-            3: { cellWidth: 18 },
-            4: { cellWidth: 22 },
-            5: { cellWidth: 34 }
-        },
+    // ⬇⬇⬇ Column width optimized
+    columnStyles: {
+        0: { cellWidth: 10 },   // # (small)
+        1: { cellWidth: 20 },   // Code (small)
+        2: { cellWidth: 90 },   // Description (BIG)
+        3: { cellWidth: 18 },   // Unit
+        4: { cellWidth: 22 },   // Qty
+        5: { cellWidth: 34 }    // Remarks (medium)
+    },
 
-        tableWidth: 'auto',
-        margin: { left: 10, right: 10 }
-    });
+    tableWidth: 'auto',
+    margin: { left: 10, right: 10 }
+});
 
     // ---------------------- SIGNATURE SECTION ----------------------
     let sectionTop = 245;
@@ -1587,8 +1599,8 @@ async function savePDF() {
     doc.text("Digital Signature:", 17 + colWidth * 2, boxY + 9);
 
     doc.setFont("helvetica", "normal");
-    doc.text(document.getElementById("preparedBy").value, 17, boxY + 19);
-    doc.text(document.getElementById("checkedBy").value, 17 + colWidth, boxY + 19);
+    doc.text($("preparedBy"), 17, boxY + 19);
+    doc.text($("checkedBy"), 17 + colWidth, boxY + 19);
 
     let signatureImage = document.getElementById("signaturePad").toDataURL("image/png");
     doc.addImage(signatureImage, "PNG", 15 + colWidth * 2 + 10, boxY + 10, 40, 14);
@@ -1598,19 +1610,13 @@ async function savePDF() {
 
     doc.setFontSize(9);
     doc.rect(70, refY, 32, 8);
-    doc.text("Reference Nbr: " + document.getElementById("refNbr").value, 72, refY + 5);
+    doc.text("Reference Nbr: " + $("refNbr"), 72, refY + 5);
 
     doc.rect(110, refY, 32, 8);
-    doc.text("Revision Nbr: " + document.getElementById("revNbr").value, 112, refY + 5);
-
-// ---------------------- Load Saved PDFs (FIX ADDED) ----------------------
-let savedPDFs = JSON.parse(localStorage.getItem("savedPDFs")) || [];
+    doc.text("Revision Nbr: " + $("revNbr"), 112, refY + 5);
 
 // ---------------------- Save PDF ----------------------
-
-// FIX: Blob → Base64 (Always works)
-let pdfURL = doc.output("datauristring");
-
+let pdfURL = doc.output("bloburl");
 let now = new Date().toLocaleString("en-GB");
 
 savedPDFs.push({
@@ -1622,10 +1628,9 @@ savedPDFs.push({
 
 localStorage.setItem("savedPDFs", JSON.stringify(savedPDFs));
 
-renderPDFCards();
-resetFormFields();
-showSuccessPopup();
-
+    renderPDFCards();
+    resetFormFields();
+    showSuccessPopup();
 
     // Download
     let a = document.createElement("a");
